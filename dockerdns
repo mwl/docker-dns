@@ -23,6 +23,7 @@ from urlparse import urlparse
 # libs
 from dnslib import A, DNSHeader, DNSLabel, DNSRecord, QTYPE, RR
 import docker
+from docker.utils import kwargs_from_env
 import gevent
 from gevent import socket, threading
 from gevent.server import DatagramServer
@@ -254,7 +255,7 @@ def main():
     QUIET = args.quiet
     resolver = () if args.no_recursion else args.resolver
     table = NameTable([(k + "." + args.domain, v) for (k, v) in args.record])
-    monitor = DockerMonitor(docker.Client(**kwargs_from_env()), table, args.domain)
+    monitor = DockerMonitor(docker.Client(**kwargs_from_env(assert_hostname=False)), table, args.domain)
     dns = DnsServer(args.dns_bind, table, resolver)
     gevent.signal(signal.SIGINT, stop, dns)
     dns.start()
