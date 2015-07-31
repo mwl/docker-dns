@@ -197,11 +197,11 @@ class DnsServer(DatagramServer):
                 print msg
 
 
-def stop(*servers): 
+def stop(*servers):
     for svr in servers:
-        if svr.started: 
-            svr.stop() 
-    sys.exit(signal.SIGINT) 
+        if svr.started:
+            svr.stop()
+    sys.exit(signal.SIGINT)
 
 def splitrecord(rec):
     m = re.match('([a-zA-Z0-9_-]*):((?:[12]?[0-9]{1,2}\.){3}(?:[12]?[0-9]{1,2}){1}$)', rec)
@@ -254,13 +254,12 @@ def main():
     QUIET = args.quiet
     resolver = () if args.no_recursion else args.resolver
     table = NameTable([(k + "." + args.domain, v) for (k, v) in args.record])
-    monitor = DockerMonitor(docker.Client(args.docker), table, args.domain)
+    monitor = DockerMonitor(docker.Client(**kwargs_from_env()), table, args.domain)
     dns = DnsServer(args.dns_bind, table, resolver)
-    gevent.signal(signal.SIGINT, stop, dns) 
+    gevent.signal(signal.SIGINT, stop, dns)
     dns.start()
     gevent.wait([gevent.spawn(monitor.run)])
 
 
 if __name__ == '__main__':
     main()
-
